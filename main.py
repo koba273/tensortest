@@ -1,34 +1,41 @@
 import bittensor
-from datetime import datetime
+"""
+Insert the values into the variables below
+Ensure that your system is secure and review scripts before running them.
+"""
+max_cost = 2.5
+netuid = 18
 
 def init_subtensor():
-    subtensor = bittensor.subtensor(network='finney', chain_endpoint='localhost:9944') 
+    subtensor = bittensor.subtensor(network='finney') 
     subtensor.get_current_block()
     return subtensor
 class Register:
-    def __init__(self, max_cost, wallet, netuid, password_):
+    _maxcost = None
+    _netuid = None
+    _wallet = None
+    def __init__(self, max_cost, wallet, netuid):
         self.subtensor = init_subtensor()
-        self.max_cost = max_cost
-        self.wallet = wallet
-        self.netuid= netuid
-    #Getters
-    def get_max_cost(self):
-        return self.max_cost
-    def get_netuid(self):
-        return self.netuid
-    def get_wallet(self):
-        return self.wallet
+        self._maxcost = max_cost
+        self._wallet = wallet
+        self._netuid= netuid
+   
     def wait_for_cost(self):
         while(True): #yes I know
-            if self.get_subnet_price() < self.get_max_cost(): # I chose this approach so it's constantly calling the recycle cost and when that'the condition is met, we register
+            if self.get_subnet_price() < self._maxcost: # I chose this approach so it's constantly calling the recycle cost and when that'the condition is met, we register
                 print("registering")
-                print(self.register())
-            print(self.get_subnet_price(), time.time )
+                reg_msg = self.register()
+                if('False' in str(reg_msg)):
+                    print(reg_msg)
+                    break # Keeping until i've collected different error codes, the docs don't have all of them
+                else:
+                    print(f'Key Successfully Purchased @ {self.get_subnet_price}. \nRegistration Message: {reg_msg}')
+                    break
+
     def get_subnet_price(self):
-        return float(str(self.subtensor.recycle(netuid=self.get_netuid())).split("τ")[1])
+        return float(str(self.subtensor.recycle(netuid=self._netuid)).split("τ")[1])
     def register(self): # you can actually get the error too many registrations per itnernal
-        return self.subtensor._do_burned_register(wallet=self.get_wallet(),netuid=self.get_netuid(), wait_for_inclusion=True, wait_for_finalization=False)
+        return self.subtensor._do_burned_register(wallet=self._wallet,netuid=self._netuid, wait_for_inclusion=True, wait_for_finalization=False)
 
-
-r = Register(max_cost=1.2,wallet=bittensor.wallet(), netuid=4, password_='Coolguy12!')
+r = Register(max_cost=max_cost,wallet=bittensor.wallet(), netuid=netuid)
 r.wait_for_cost()

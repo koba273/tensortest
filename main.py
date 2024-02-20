@@ -1,13 +1,17 @@
 import bittensor
+import datetime
 """
 Insert the values into the variables below
 Ensure that your system is secure and review scripts before running them.
-"""
-max_cost = 2.5
-netuid = 18
 
+TODO:
+Once the 'Too many reg's this inverval error' comes, find out when the interval opens and start registering in preperation for that
+"""
+max_cost = 1
+netuid = 4
+subtensor_ip = "ws://127.0.0.1:9944"
 def init_subtensor():
-    subtensor = bittensor.subtensor(network='finney') 
+    subtensor = bittensor.subtensor(network=subtensor_ip)
     subtensor.get_current_block()
     return subtensor
 class Register:
@@ -22,15 +26,17 @@ class Register:
    
     def wait_for_cost(self):
         while(True): #yes I know
+            print(self.get_subnet_price(), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
             if self.get_subnet_price() < self._maxcost: # I chose this approach so it's constantly calling the recycle cost and when that'the condition is met, we register
                 print("registering")
                 reg_msg = self.register()
+                
                 if('False' in str(reg_msg)):
                     print(reg_msg)
-                    break # Keeping until i've collected different error codes, the docs don't have all of them
+                    #break # Keeping until i've collected different error codes, the docs don't have all of them
                 else:
                     print(f'Key Successfully Purchased @ {self.get_subnet_price}. \nRegistration Message: {reg_msg}')
-                    break
+                    #break
 
     def get_subnet_price(self):
         return float(str(self.subtensor.recycle(netuid=self._netuid)).split("τ")[1])

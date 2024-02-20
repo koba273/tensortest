@@ -35,7 +35,7 @@ class Register:
                     #break # Keeping until i've collected different error codes, the docs don't have all of them
                 else:
                     print(f'Key Successfully Purchased @ {self.get_subnet_price}. \nRegistration Message: {reg_msg}')
-                    #break
+                    break
 
     def get_subnet_price(self):
         return float(str(self.subtensor.recycle(netuid=self._netuid)).split("τ")[1])

@@ -26,7 +26,6 @@ class Register:
    
     def wait_for_cost(self):
         while(True): #yes I know
-            print(self.get_subnet_price(), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
             if self.get_subnet_price() < self._maxcost: # I chose this approach so it's constantly calling the recycle cost and when that'the condition is met, we register
                 print("registering")
                 reg_msg = self.register()
